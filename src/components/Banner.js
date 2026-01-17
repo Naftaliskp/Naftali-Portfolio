@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import headerImg from "../assets/img/header.png";
 import { ArrowRightCircle } from 'react-bootstrap-icons';
@@ -10,19 +10,10 @@ export const Banner = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [text, setText] = useState('');
   const [delta, setDelta] = useState(120 - Math.random() * 40);
-  const [index, setIndex] = useState(1);
   const toRotate = [ "Software Quality Assurance", "Performance Tester", "Web Developer" ];
   const period = 700;
 
-  useEffect(() => {
-    let ticker = setInterval(() => {
-      tick();
-    }, delta);
-
-    return () => { clearInterval(ticker) };
-  }, [text])
-
-  const tick = () => {
+  const tick = useCallback(() => {
     let i = loopNum % toRotate.length;
     let fullText = toRotate[i];
     let updatedText = isDeleting ? fullText.substring(0, text.length - 1) : fullText.substring(0, text.length + 1);
@@ -35,17 +26,21 @@ export const Banner = () => {
 
     if (!isDeleting && updatedText === fullText) {
       setIsDeleting(true);
-      setIndex(prevIndex => prevIndex - 1);
       setDelta(period);
     } else if (isDeleting && updatedText === '') {
       setIsDeleting(false);
       setLoopNum(loopNum + 1);
-      setIndex(1);
       setDelta(300);
-    } else {
-      setIndex(prevIndex => prevIndex + 1);
     }
-  }
+  }, [loopNum, isDeleting, text, toRotate]);
+
+  useEffect(() => {
+    let ticker = setInterval(() => {
+      tick();
+    }, delta);
+
+    return () => { clearInterval(ticker) };
+  }, [delta, tick]);
 
   return (
     <section className="banner" id="home">
@@ -58,7 +53,6 @@ export const Banner = () => {
                 <span className="tagline">Welcome to my Portfolio</span>
                 <h1>{`Hi! I'm Naftali`} <span className="txt-rotate" dataPeriod="1000" data-rotate='[ "Software Quality Assurance", "Performance Tester", "Web Developer" ]'><span className="wrap">{text}</span></span></h1>
                   <p>I am a Bachelor of Information Technology graduate from Institut Teknologi Sepuluh Nopember with experience in software quality assurance, performance testing, and application development. Currently working as a Software Quality Assurance at PT Astra Graphia Information Technology, I create and maintain test cases, perform manual and automated testing using Playwright, conduct performance testing with K6, and utilize Jira for test management. Previously, I worked as a Junior Performance Test Engineer at PT Bank Syariah Indonesia Tbk, specializing in LoadRunner-based testing, server monitoring with Dynatrace, and delivering detailed reports for stress and load tests. With a strong foundation in both technical and collaborative skills, I am passionate about ensuring software reliability, optimizing performance, and delivering high-quality solutions.</p>
-                  {/* <button onClick={() => console.log('connect')}>Let’s Connect <ArrowRightCircle size={25} /></button> */}
                   <button onClick={() => window.open("https://www.linkedin.com/in/naftaliskp", "_blank")}>
                     Find me on LinkedIn <ArrowRightCircle size={25} />
                   </button>
